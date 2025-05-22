@@ -30,9 +30,63 @@ class UsuariosDAO extends DAO{
             return false;
         }
     }
-    public function excluir($obj){}
-    public function alterar($obj){}
-    public function buscarPorId($obj){}
+    public function excluir($obj){
+        $sql = "DELETE FROM usuarios WHERE id = :id";
+        $stmt = $this->getConn()->prepare($sql);
+        $stmt->bindValue(':id', $obj);
+        if($stmt->execute()){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function alterar($obj){
+        $sql = "UPDATE usuarios SET 
+                    nome = :nome,
+                    senha = :senha,
+                    status = :status
+                WHERE 
+                    id = :id
+            ";
+        $stmt = $this->getConn()->prepare($sql);
+        $stmt->bindValue(':nome', $obj->__get('nome'));
+        $stmt->bindValue(':senha', $obj->__get('senha'));
+        $stmt->bindValue(':status', $obj->__get('status'));
+        $stmt->bindValue(':id', $obj->__get('id'));
+        if($stmt->execute()){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function buscarPorId($obj){
+        $sql = "SELECT 
+                    *
+                FROM 
+                    usuarios 
+                WHERE 
+                    id = :id
+            ";
+        $stmt = $this->getConn()->prepare($sql);
+        $stmt->bindValue(':id', $obj);
+        $stmt->execute();
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+        
+        if($result){
+            $usuariosModel = new UsuariosModel();
+            $usuariosModel->__set('id', $result['id']);
+            $usuariosModel->__set('nome', $result['nome']);
+            $usuariosModel->__set('senha', $result['senha']);
+            $usuariosModel->__set('status', $result['status']);
+            return $usuariosModel;
+            
+        } else {
+            return false;
+        }
+    }
+
     public function listar(){
         try{
             $usuarios = array();
